@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quiz_app/controller/game_controller.dart';
+import 'package:zoom_tap_animation/zoom_tap_animation.dart';
 
 class GameScreen extends StatelessWidget {
   final GameController controller = Get.put(GameController());
@@ -10,177 +11,205 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
-        title: const Text(
-          "So'zni toping",
-          style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
-        ),
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          // Background image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/background.png',
-              fit: BoxFit.cover,
-            ),
+      body: AnimatedContainer(
+        duration: const Duration(seconds: 10),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.blue.shade400,
+              Colors.purple.shade400,
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 35),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             child: Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Obx(() => Text('Savol: ${controller.hints.value}',
-                        style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white))),
-                    Obx(() => Text('${controller.score.value}',
-                        style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white))),
-                    Obx(() => Text('Olmoslar: ${controller.diamonds.value}',
-                        style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white))),
-                  ],
-                ),
-                const SizedBox(height: 25),
-                Obx(() => Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            controller
-                                .questions[
-                                    controller.currentQuestionIndex.value]
-                                .questionText,
-                            style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    )),
-                const SizedBox(height: 55),
-                Obx(
-                  () => Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      controller
-                          .questions[controller.currentQuestionIndex.value]
-                          .answer
-                          .length,
-                      (index) => Container(
-                        width: 40,
-                        height: 40,
-                        margin: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.blue, width: 4),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        alignment: Alignment.center,
-                        child: Obx(() => Text(
-                              controller.selectedLetters.value.length > index
-                                  ? controller.selectedLetters.value[index]
-                                  : '',
-                              style: const TextStyle(
-                                  fontSize: 24, color: Colors.white),
-                            )),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 25),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    SizedBox(
-                      width: 150,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () => controller.deleteLastLetter(),
-                        child: const Icon(
-                          Icons.remove_circle_outline_sharp,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 150,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () => controller.useDiamondsForHint(),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.diamond,
-                              color: Colors.white,
-                            ),
-                            Text(
-                              '10',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                _buildAppBar(),
+                const SizedBox(height: 20),
+                _buildScoreBoard(),
+                const SizedBox(height: 30),
+                _buildQuestion(),
+                const SizedBox(height: 40),
+                _buildAnswerBoxes(),
+                const SizedBox(height: 30),
+                _buildActionButtons(),
                 const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 100),
-                  child: Obx(() => Wrap(
-                        alignment: WrapAlignment.center,
-                        children: controller.letterOptions
-                            .map((letter) => Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: ElevatedButton(
-                                    onPressed: () =>
-                                        controller.selectLetter(letter),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blue,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      minimumSize: const Size(50, 50),
-                                    ),
-                                    child: Text(
-                                      letter,
-                                      style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ))
-                            .toList(),
-                      )),
-                ),
+                _buildLetterOptions(),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  Widget _buildAppBar() {
+    return const Text(
+      "So'zni toping",
+      style: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+        fontSize: 28,
+      ),
+    );
+  }
+
+  Widget _buildScoreBoard() {
+    return Obx(() => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildScoreItem(
+                Icons.question_mark, 'Savol', '${controller.hints.value}'),
+            _buildScoreItem(Icons.star, 'Score', '${controller.score.value}'),
+            _buildScoreItem(
+                Icons.diamond, 'Olmoslar', '${controller.diamonds.value}'),
+          ],
+        ));
+  }
+
+  Widget _buildScoreItem(IconData icon, String label, String value) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white, size: 24),
+        const SizedBox(height: 4),
+        Text(label,
+            style: const TextStyle(color: Colors.white70, fontSize: 14)),
+        Text(value,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _buildQuestion() {
+    return Obx(() => Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            controller
+                .questions[controller.currentQuestionIndex.value].questionText,
+            style: const TextStyle(
+                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
+        ));
+  }
+
+  Widget _buildAnswerBoxes() {
+    return Obx(
+      () => Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 3,
+        runSpacing: 3,
+        children: List.generate(
+          controller
+              .questions[controller.currentQuestionIndex.value].answer.length,
+          (index) => Container(
+            width: 35,
+            height: 35,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            alignment: Alignment.center,
+            child: Obx(() => FittedBox(
+                  fit: BoxFit.contain,
+                  child: Text(
+                    controller.selectedLetters.value.length > index
+                        ? controller.selectedLetters.value[index]
+                        : '',
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                )),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildActionButton(
+            Icons.backspace, 'Delete', () => controller.deleteLastLetter()),
+        _buildActionButton(
+            Icons.diamond, 'Hint (10)', () => controller.useDiamondsForHint()),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(
+      IconData icon, String label, VoidCallback onPressed) {
+    return ZoomTapAnimation(
+      onTap: onPressed,
+      enableLongTapRepeatEvent: false,
+      longTapRepeatDuration: const Duration(milliseconds: 100),
+      begin: 1.0,
+      end: 0.93,
+      beginDuration: const Duration(milliseconds: 20),
+      endDuration: const Duration(milliseconds: 120),
+      beginCurve: Curves.decelerate,
+      endCurve: Curves.fastOutSlowIn,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.white),
+        label: Text(label, style: const TextStyle(color: Colors.white)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white.withOpacity(0.2),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLetterOptions() {
+    return Obx(() => Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
+          children: controller.letterOptions
+              .map((letter) => ZoomTapAnimation(
+                    onTap: () => controller.selectLetter(letter),
+                    enableLongTapRepeatEvent: false,
+                    longTapRepeatDuration: const Duration(milliseconds: 100),
+                    begin: 1.0,
+                    end: 0.93,
+                    beginDuration: const Duration(milliseconds: 20),
+                    endDuration: const Duration(milliseconds: 120),
+                    beginCurve: Curves.decelerate,
+                    endCurve: Curves.fastOutSlowIn,
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        letter,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ))
+              .toList(),
+        ));
   }
 }
