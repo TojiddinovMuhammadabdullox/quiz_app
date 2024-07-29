@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:quiz_app/controller/game_controller.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quiz_app/blocs/game_cubit.dart';
+import 'package:quiz_app/blocs/game_state.dart';
 import 'package:zoom_tap_animation/zoom_tap_animation.dart';
 
 class GameScreen extends StatelessWidget {
-  final GameController controller = Get.put(GameController());
-
-  GameScreen({super.key});
+  const GameScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,15 +29,15 @@ class GameScreen extends StatelessWidget {
               children: [
                 _buildAppBar(),
                 const SizedBox(height: 20),
-                _buildScoreBoard(),
-                const SizedBox(height: 30),
-                _buildQuestion(),
-                const SizedBox(height: 40),
-                _buildAnswerBoxes(),
-                const SizedBox(height: 30),
-                _buildActionButtons(),
+                _buildScoreBoard(context),
+                const SizedBox(height: 20),
+                _buildQuestion(context),
+                const SizedBox(height: 20),
+                _buildAnswerBoxes(context),
+                const SizedBox(height: 20),
+                _buildActionButtons(context),
                 const Spacer(),
-                _buildLetterOptions(),
+                _buildLetterOptions(context),
               ],
             ),
           ),
@@ -58,17 +57,20 @@ class GameScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildScoreBoard() {
-    return Obx(() => Row(
+  Widget _buildScoreBoard(BuildContext context) {
+    return BlocBuilder<GameCubit, GameState>(
+      builder: (context, state) {
+        return Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildScoreItem(
-                Icons.question_mark, 'Savol', '${controller.hints.value}'),
-            _buildScoreItem(Icons.star, 'Score', '${controller.score.value}'),
-            _buildScoreItem(
-                Icons.diamond, 'Olmoslar', '${controller.diamonds.value}'),
+            _buildScoreItem(Icons.question_mark, 'Savollar',
+                '${state.currentQuestionIndex + 1}/${state.questions.length}'),
+            _buildScoreItem(Icons.diamond, 'Olmoslar', '${state.diamonds}'),
+            _buildScoreItem(Icons.help, 'Savollar', '${state.hints}'),
           ],
-        ));
+        );
+      },
+    );
   }
 
   Widget _buildScoreItem(IconData icon, String label, String value) {
@@ -76,140 +78,181 @@ class GameScreen extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.white, size: 24),
         const SizedBox(height: 4),
-        Text(label,
-            style: const TextStyle(color: Colors.white70, fontSize: 14)),
-        Text(value,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white, fontSize: 12),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(
+              color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+        ),
       ],
     );
   }
 
-  Widget _buildQuestion() {
-    return Obx(() => Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: SizedBox(
-          width: 250,
+  Widget _buildQuestion(BuildContext context) {
+    return BlocBuilder<GameCubit, GameState>(
+      builder: (context, state) {
+        return Container(
           height: 250,
-          child: Image.network(
-            controller
-                .questions[controller.currentQuestionIndex.value].questionText,
-          ),
-        )));
-  }
-
-  Widget _buildAnswerBoxes() {
-    return Obx(
-      () => Wrap(
-        alignment: WrapAlignment.center,
-        spacing: 3,
-        runSpacing: 3,
-        children: List.generate(
-          controller
-              .questions[controller.currentQuestionIndex.value].answer.length,
-          (index) => Container(
-            width: 35,
-            height: 35,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(6),
+          width: 250,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.network(
+              state.questions[state.currentQuestionIndex].questionText,
+              fit: BoxFit.cover,
             ),
-            alignment: Alignment.center,
-            child: Obx(() => FittedBox(
-                  fit: BoxFit.contain,
-                  child: Text(
-                    controller.selectedLetters.value.length > index
-                        ? controller.selectedLetters.value[index]
-                        : '',
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                )),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildActionButton(
-            Icons.backspace, 'Delete', () => controller.deleteLastLetter()),
-        _buildActionButton(
-            Icons.diamond, 'Hint (10)', () => controller.useDiamondsForHint()),
-      ],
-    );
-  }
+  Widget _buildAnswerBoxes(BuildContext context) {
+    return BlocBuilder<GameCubit, GameState>(
+      builder: (context, state) {
+        final int answerLength =
+            state.questions[state.currentQuestionIndex].answer.length;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final double boxWidth =
+                (constraints.maxWidth - (answerLength - 1) * 8) / answerLength;
+            final double boxSize = boxWidth > 35 ? 35 : boxWidth;
 
-  Widget _buildActionButton(
-      IconData icon, String label, VoidCallback onPressed) {
-    return ZoomTapAnimation(
-      onTap: onPressed,
-      enableLongTapRepeatEvent: false,
-      longTapRepeatDuration: const Duration(milliseconds: 100),
-      begin: 1.0,
-      end: 0.93,
-      beginDuration: const Duration(milliseconds: 20),
-      endDuration: const Duration(milliseconds: 120),
-      beginCurve: Curves.decelerate,
-      endCurve: Curves.fastOutSlowIn,
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white),
-        label: Text(label, style: const TextStyle(color: Colors.white)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white.withOpacity(0.2),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLetterOptions() {
-    return Obx(() => Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 8,
-          runSpacing: 8,
-          children: controller.letterOptions
-              .map((letter) => ZoomTapAnimation(
-                    onTap: () => controller.selectLetter(letter),
-                    enableLongTapRepeatEvent: false,
-                    longTapRepeatDuration: const Duration(milliseconds: 100),
-                    begin: 1.0,
-                    end: 0.93,
-                    beginDuration: const Duration(milliseconds: 20),
-                    endDuration: const Duration(milliseconds: 120),
-                    beginCurve: Curves.decelerate,
-                    endCurve: Curves.fastOutSlowIn,
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                answerLength,
+                (index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Container(
-                      width: 50,
-                      height: 50,
+                      width: boxSize,
+                      height: boxSize,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        letter,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                      child: Center(
+                        child: Text(
+                          index < state.selectedLetters.length
+                              ? state.selectedLetters[index]
+                              : '',
+                          style: TextStyle(
+                            fontSize: boxSize * 0.6,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ))
-              .toList(),
-        ));
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ZoomTapAnimation(
+          onTap: () => context.read<GameCubit>().deleteLastLetter(),
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Icon(Icons.backspace, color: Colors.red, size: 30),
+            ),
+          ),
+        ),
+        const SizedBox(width: 20),
+        ZoomTapAnimation(
+          onTap: () => context.read<GameCubit>().useDiamondsForHint(),
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Icon(Icons.lightbulb, color: Colors.yellow, size: 30),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLetterOptions(BuildContext context) {
+    return BlocBuilder<GameCubit, GameState>(
+      builder: (context, state) {
+        return Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 6,
+          runSpacing: 6,
+          children: state.letterOptions.map((letter) {
+            return ZoomTapAnimation(
+              onTap: () => context.read<GameCubit>().selectLetter(letter),
+              child: Container(
+                width: 55,
+                height: 35,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    letter,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
   }
 }
