@@ -5,16 +5,18 @@ import 'package:quiz_app/model/question.dart';
 
 class GameController extends GetxController {
   var questions = <Question>[
-    Question('Tishi bor ammo tishlab ololmaydi.', 'TIRNOQ'),
-    Question('Uchar emas, qush emas.', 'SAMOLYOT'),
-    Question('Yilning sakkizinchi oyi.', 'AVGUST'),
-    Question('Kirish uchun ishlatiladi.', 'ESHIK'),
-    Question('Barmoqqa kiyiladigan taqinchoq.', 'UZUK'),
-    Question('Nordon meva.', 'LIMON'),
-    Question('Bog\'lash uchun ishlatiladi.', 'IP'),
-    Question('Suvsiz maskan.', 'SAXRO'),
-    Question('Davlat raxbat', 'QIROL'),
-    Question('Uxlash', 'UXLASH'),
+    Question(
+        'https://bygame.ru/uploads/ai/4-fotki-1-slovo-new/5/37.webp?v=1682812404',
+        'QUM'),
+    Question(
+        'https://bygame.ru/uploads/ai/4-fotki-1-slovo-new/5/53.webp?v=1682812404',
+        'HAVORANG'),
+    Question(
+        'https://bygame.ru/uploads/ai/4-fotki-1-slovo-new/6/3.webp?v=1682812404',
+        'OYNA'),
+    Question(
+        'https://bygame.ru/uploads/ai/4-fotki-1-slovo-new/6/1.webp?v=1682812404',
+        'ASHULA'),
   ].obs;
 
   var currentQuestionIndex = 0.obs;
@@ -23,7 +25,7 @@ class GameController extends GetxController {
   var hints = 0.obs;
   var diamonds = 50.obs;
   var correctAnswers = 0.obs;
-  var incorrectAnswers = 0.obs;
+  var incorrectAnswers = 0.obs; 
   var letterOptions = <String>[].obs;
 
   @override

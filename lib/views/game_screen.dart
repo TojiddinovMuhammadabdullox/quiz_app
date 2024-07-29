@@ -89,19 +89,19 @@ class GameScreen extends StatelessWidget {
 
   Widget _buildQuestion() {
     return Obx(() => Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SizedBox(
+          width: 250,
+          height: 250,
+          child: Image.network(
             controller
                 .questions[controller.currentQuestionIndex.value].questionText,
-            style: const TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-            textAlign: TextAlign.center,
           ),
-        ));
+        )));
   }
 
   Widget _buildAnswerBoxes() {
