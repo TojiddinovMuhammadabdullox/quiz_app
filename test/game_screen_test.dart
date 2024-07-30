@@ -11,27 +11,27 @@ void main() {
     setUp(() {
       gameCubit = GameCubit();
     });
-
     testWidgets('should display 4 images and buttons',
         (WidgetTester tester) async {
       await tester.pumpWidget(
+        // `pumpWidget` yordamida widgetni yuklaydi.
         MaterialApp(
           home: BlocProvider(
+            // `BlocProvider` yordamida `GameCubit` ni korsatadi.
             create: (_) => gameCubit,
-            child: GameScreen(),
+            child:
+                GameScreen(), // Test qilinadigan `GameScreen` widgetini oladi.
           ),
         ),
       );
 
-      // Verify 4 images are displayed
-      final imageFinder = find.byType(Image);
-      expect(imageFinder, findsNWidgets(4));
+      final imageFinder = find.byType(Image); //image topadi
+      expect(imageFinder, findsNWidgets(4)); //4 ta image bormi yomi tekshiradi
 
-      // Verify Delete button is displayed
-      expect(find.text('Delete'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget); //delete buttonni topadi
 
-      // Verify Hint button is displayed
-      expect(find.text('Hint (10)'), findsOneWidget);
+      expect(find.text('Hint (10)'),
+          findsOneWidget); // olmos ishlatish buttoni topadi  
     });
   });
 }

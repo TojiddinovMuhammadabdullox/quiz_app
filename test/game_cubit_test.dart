@@ -6,65 +6,60 @@ import 'package:quiz_app/blocs/game_state.dart';
 void main() {
   group('GameCubit Unit Test', () {
     late GameCubit gameCubit;
-
     setUp(() {
       gameCubit = GameCubit();
     });
 
     tearDown(() {
-      gameCubit.close();
+      gameCubit.close(); // 'GameCubit'ni yopadi va resurslarni bo'shatadi.
     });
 
     test('initial state is GameState', () {
       expect(gameCubit.state, GameState.initial());
     });
-
     blocTest<GameCubit, GameState>(
-      'emits correct states when selectLetter is called with correct answer',
-      build: () => gameCubit,
+      'emits correct states when selectLetter is called with correct answer', // Testning nomi.
+      build: () => gameCubit, // 'GameCubit' ni yaratadi.
       act: (cubit) {
-        cubit.selectLetter('Q');
+        cubit.selectLetter('Q'); // Harfni tanlash.
         cubit.selectLetter('U');
         cubit.selectLetter('M');
       },
       expect: () => [
-        isA<GameState>(),
+        isA<GameState>(), // Har bir harf tanlanganda yangi holatni emit qiladi.
         isA<GameState>(),
         isA<GameState>(),
       ],
     );
-
     blocTest<GameCubit, GameState>(
-      'emits correct states when deleteLastLetter is called',
-      build: () => gameCubit,
+      'emits correct states when deleteLastLetter is called', // Testning nomi.
+      build: () => gameCubit, // 'GameCubit' ni yaratadi.
       act: (cubit) {
-        cubit.selectLetter('Q');
-        cubit.deleteLastLetter();
+        cubit.selectLetter('Q'); // Harfni tanlash.
+        cubit.deleteLastLetter(); // Tanlangan harfni o'chirish.
       },
       expect: () => [
-        isA<GameState>(),
+        isA<GameState>(), // Harf o'chirilganda yangi holatni emit qiladi.
       ],
     );
-
     blocTest<GameCubit, GameState>(
       'emits correct states when useDiamondsForHint is called',
       build: () => gameCubit,
       act: (cubit) {
-        cubit.useDiamondsForHint();
+        cubit.useDiamondsForHint(); //   olmosdan foydalanish.
       },
       expect: () => [
-        isA<GameState>(),
+        isA<GameState>(), // yangi holatni setState qiladi.
       ],
     );
-
     blocTest<GameCubit, GameState>(
       'emits correct states when nextQuestion is called',
-      build: () => gameCubit,
+      build: () => gameCubit, // 'GameCubit' ni yaratadi.
       act: (cubit) {
-        cubit.nextQuestion();
+        cubit.nextQuestion(); // Keyingi savolga o'tish.
       },
       expect: () => [
-        isA<GameState>(),
+        isA<GameState>(), // Keyingi savolga o'tganda yangi holatni emit qiladi.
       ],
     );
   });

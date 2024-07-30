@@ -32,70 +32,78 @@ class GameCubit extends Cubit<GameState> {
         )) {
     loadQuestion();
   }
-
   void loadQuestion() {
-    var answer = state.questions[state.currentQuestionIndex].answer;
-    var randomLetters = 'ABDEFGHIJKLMNOPQRSTUVWXYZ';
-    var rng = Random();
-    List<String> letterOptions = answer.split('');
+    var answer = state.questions[state.currentQuestionIndex]
+        .answer; //  savolning javobini oladi.
+    var randomLetters = 'ABDEFGHIJKLMNOPQRSTUVWXYZ'; // random harflar ro'yxati.
+    var rng = Random(); // random sonlar generatori.
+    List<String> letterOptions =
+        answer.split(''); // Javobdagi harflarni ro'yxatga aylantiradi.
     while (letterOptions.length < 10) {
-      var randomLetter = randomLetters[rng.nextInt(randomLetters.length)];
+      var randomLetter = randomLetters[
+          rng.nextInt(randomLetters.length)]; // random harf oladi.
       if (!letterOptions.contains(randomLetter)) {
-        letterOptions.add(randomLetter);
+        letterOptions
+            .add(randomLetter); // Agar bu harf ro'yxatda bo'lmasa, qo'shadi.
       }
     }
-    letterOptions.shuffle();
-    emit(state.copyWith(letterOptions: letterOptions));
+    letterOptions.shuffle(); // Harflarni random   aralashtiradi.
+    emit(state.copyWith(
+        letterOptions: letterOptions)); // Yangi holatni emit qiladi.
   }
 
   void selectLetter(String letter) {
     if (state.selectedLetters.length <
         state.questions[state.currentQuestionIndex].answer.length) {
-      String updatedLetters = state.selectedLetters + letter;
-      emit(state.copyWith(selectedLetters: updatedLetters));
+      String updatedLetters =
+          state.selectedLetters + letter; // Tanlangan harfni qo'shadi.
+      emit(state.copyWith(
+          selectedLetters: updatedLetters)); // Yangi holatni emit qiladi.
       if (updatedLetters.length ==
           state.questions[state.currentQuestionIndex].answer.length) {
-        checkAnswer(updatedLetters);
+        checkAnswer(
+            updatedLetters); // Agar tanlangan harflar soni javob uzunligiga teng bo'lsa, javobni tekshiradi.
       }
     }
   }
 
   void deleteLastLetter() {
     if (state.selectedLetters.isNotEmpty) {
-      String updatedLetters =
-          state.selectedLetters.substring(0, state.selectedLetters.length - 1);
-      emit(state.copyWith(selectedLetters: updatedLetters));
+      String updatedLetters = state.selectedLetters.substring(
+          0, state.selectedLetters.length - 1); // Oxirgi harfni olib tashlaydi.
+      emit(state.copyWith(
+          selectedLetters:
+              updatedLetters)); // Yangi holatni emit "setState" qiladi.
     }
   }
 
   void checkAnswer(String selectedLetters) {
     if (selectedLetters == state.questions[state.currentQuestionIndex].answer) {
-      int updatedScore = state.score + 10;
-      int updatedCorrectAnswers = state.correctAnswers + 1;
+      int updatedScore = state.score + 10; // To'g'ri javob uchun ball qo'shadi.
+      int updatedCorrectAnswers =
+          state.correctAnswers + 1; // To'g'ri javoblar sonini oshiradi.
       emit(state.copyWith(
         score: updatedScore,
         correctAnswers: updatedCorrectAnswers,
       ));
-      nextQuestion();
+      nextQuestion(); // Keyingi savolga o'tadi.
     } else {
-      int updatedIncorrectAnswers = state.incorrectAnswers + 1;
+      int updatedIncorrectAnswers =
+          state.incorrectAnswers + 1; // Noto'g'ri javoblar sonini oshiradi.
       emit(state.copyWith(incorrectAnswers: updatedIncorrectAnswers));
-      // Show dialog or other UI feedback for incorrect answer
     }
   }
 
   void nextQuestion() {
     if (state.currentQuestionIndex < state.questions.length - 1) {
-      int updatedIndex = state.currentQuestionIndex + 1;
+      int updatedIndex =
+          state.currentQuestionIndex + 1; // Joriy savol indeksini oshiradi.
       emit(state.copyWith(
         currentQuestionIndex: updatedIndex,
         selectedLetters: '',
       ));
-      loadQuestion();
-    } else {
-      // Show game results
-      // Reset game or show final results
-    }
+      loadQuestion(); // Yangi savolni yuklaydi.
+    } else {}
   }
 
   void resetGame() {
@@ -106,29 +114,31 @@ class GameCubit extends Cubit<GameState> {
       incorrectAnswers: 0,
       selectedLetters: '',
     ));
-    loadQuestion();
+    loadQuestion(); // O'yinni qayta boshlaydi va yangi savolni yuklaydi.
   }
 
   void useDiamondsForHint() {
     if (state.diamonds >= 10) {
-      int updatedDiamonds = state.diamonds - 10;
-      var answer = state.questions[state.currentQuestionIndex].answer;
+      int updatedDiamonds = state.diamonds - 10; // 10 olmos kamaytiradi.
+      var answer = state.questions[state.currentQuestionIndex]
+          .answer; // Joriy savolning javobini oladi.
       String updatedLetters = state.selectedLetters;
       for (int i = 0; i < answer.length; i++) {
         if (i >= updatedLetters.length || updatedLetters[i] != answer[i]) {
           updatedLetters = updatedLetters.substring(0, i) +
               answer[i] +
-              updatedLetters.substring(i);
+              updatedLetters.substring(
+                  i); // yordam  birinchi mos kelmagan harfni qo'shadi.
           break;
         }
       }
       emit(state.copyWith(
-          selectedLetters: updatedLetters, diamonds: updatedDiamonds));
+          selectedLetters: updatedLetters,
+          diamonds: updatedDiamonds)); // Yangi holatni emit qiladi.
       if (updatedLetters.length == answer.length) {
-        checkAnswer(updatedLetters);
+        checkAnswer(
+            updatedLetters); // Agar qo'shilgan harflar to'g'ri javob bilan teng bo'lsa, javobni tekshiradi.
       }
-    } else {
-      // Show snackbar or other UI feedback for insufficient diamonds
-    }
+    } else {}
   }
 }
