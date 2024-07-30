@@ -38,7 +38,7 @@ class GameCubit extends Cubit<GameState> {
     var randomLetters = 'ABDEFGHIJKLMNOPQRSTUVWXYZ'; // random harflar ro'yxati.
     var rng = Random(); // random sonlar generatori.
     List<String> letterOptions =
-        answer.split(''); // Javobdagi harflarni ro'yxatga aylantiradi.
+        answer.split(''); // Javobdagi harflarni ro'yxatga aylantiradi.  // spliy harflarni alohida olish uchun
     while (letterOptions.length < 10) {
       var randomLetter = randomLetters[
           rng.nextInt(randomLetters.length)]; // random harf oladi.

@@ -11,7 +11,7 @@ void main() {
     });
 
     tearDown(() {
-      gameCubit.close(); // 'GameCubit'ni yopadi va resurslarni bo'shatadi.
+      gameCubit.close(); // 'GameCubit'ni yopadi
     });
 
     test('initial state is GameState', () {
@@ -19,27 +19,27 @@ void main() {
     });
     blocTest<GameCubit, GameState>(
       'emits correct states when selectLetter is called with correct answer', // Testning nomi.
-      build: () => gameCubit, // 'GameCubit' ni yaratadi.
+      build: () => gameCubit, // 'GameCubit ni yaratadi.
       act: (cubit) {
         cubit.selectLetter('Q'); // Harfni tanlash.
         cubit.selectLetter('U');
         cubit.selectLetter('M');
       },
       expect: () => [
-        isA<GameState>(), // Har bir harf tanlanganda yangi holatni emit qiladi.
+        isA<GameState>(), // Har bir harf tanlanganda yangi holatni emit "setState" qiladi.
         isA<GameState>(),
         isA<GameState>(),
       ],
     );
     blocTest<GameCubit, GameState>(
-      'emits correct states when deleteLastLetter is called', // Testning nomi.
-      build: () => gameCubit, // 'GameCubit' ni yaratadi.
+      'emits correct states when deleteLastLetter is called',
+      build: () => gameCubit,
       act: (cubit) {
-        cubit.selectLetter('Q'); // Harfni tanlash.
+        cubit.selectLetter('Q');
         cubit.deleteLastLetter(); // Tanlangan harfni o'chirish.
       },
       expect: () => [
-        isA<GameState>(), // Harf o'chirilganda yangi holatni emit qiladi.
+        isA<GameState>(), // Harf o'chirilganda yangi holatni  emit "setState" qiladi.
       ],
     );
     blocTest<GameCubit, GameState>(
@@ -54,7 +54,7 @@ void main() {
     );
     blocTest<GameCubit, GameState>(
       'emits correct states when nextQuestion is called',
-      build: () => gameCubit, // 'GameCubit' ni yaratadi.
+      build: () => gameCubit, 
       act: (cubit) {
         cubit.nextQuestion(); // Keyingi savolga o'tish.
       },
